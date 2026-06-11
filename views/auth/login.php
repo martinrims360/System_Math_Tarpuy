@@ -127,7 +127,7 @@
     </div>
   <?php endif; ?>
 
-  <form method="POST" action="/index.php?page=login">
+  <form method="POST" action="?page=login">
     <div class="mb-3">
       <label class="form-label">Correo institucional</label>
       <div class="input-group">

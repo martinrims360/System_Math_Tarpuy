@@ -12,7 +12,7 @@ class AuthController {
 
     public function login(): void {
         if (Auth::check()) {
-            header('Location: /index.php?page=dashboard');
+            header('Location: /concursos_mat/index.php?page=dashboard');
             exit;
         }
 
@@ -35,7 +35,7 @@ class AuthController {
                     if ($docente && $docente['estado'] == 1 &&
                         password_verify($password, $docente['password_hash'])) {
                         Auth::login($docente);
-                        header('Location: /index.php?page=dashboard');
+                        header('Location: /concursos_mat/index.php?page=dashboard');
                         exit;
                     } else {
                         $error = 'Correo o contraseña incorrectos, o cuenta inactiva.';
@@ -53,7 +53,7 @@ class AuthController {
 
     public function logout(): void {
         Auth::logout();
-        header('Location: /index.php?page=login');
+        header('Location: /concursos_mat/index.php?page=login');
         exit;
     }
 }
