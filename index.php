@@ -8,7 +8,7 @@ Auth::start();
 
 $page = $_GET['page'] ?? 'dashboard';
 
-// Rutas públicas (sin sesión)
+// Rutas públicas (sin sesión)a
 $public = ['login'];
 
 if (!in_array($page, $public)) {
