@@ -1,4 +1,4 @@
-<?php
+<<?php
 // index.php — router principal
 
 require_once __DIR__ . '/config/database.php';
@@ -8,7 +8,7 @@ Auth::start();
 
 $page = $_GET['page'] ?? 'dashboard';
 
-// Rutas públicas (sin sesión)a
+// Rutas públicas (sin sesión)
 $public = ['login'];
 
 if (!in_array($page, $public)) {

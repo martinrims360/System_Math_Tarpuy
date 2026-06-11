@@ -1,5 +1,5 @@
 <?php
-// helpers/Auth.php_m
+// helpers/Auth.php
 
 class Auth {
 
