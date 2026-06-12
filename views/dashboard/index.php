@@ -78,7 +78,7 @@
         <?php endforeach; ?>
       </div>
       <div style="margin-top:12px">
-        <a href="/index.php?page=temas" class="btn btn-sm">
+        <a href="index.php?page=temas" class="btn btn-sm">
           <i class="ti ti-list"></i> Ver todos los temas
         </a>
       </div>
@@ -122,7 +122,7 @@
         <?php endforeach; ?>
       </div>
       <div style="margin-top:12px">
-        <a href="/index.php?page=horarios" class="btn btn-sm">
+        <a href="index.php?page=horarios" class="btn btn-sm">
           <i class="ti ti-calendar"></i> Ver todos los horarios
         </a>
       </div>
@@ -135,17 +135,17 @@
 <div class="card" style="margin-top:20px">
   <div class="card-title">Accesos rápidos</div>
   <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <a href="/index.php?page=temas&action=create" class="btn btn-primary">
+    <a href="index.php?page=temas&action=create" class="btn btn-primary">
       <i class="ti ti-plus"></i> Registrar tema
     </a>
-    <a href="/index.php?page=horarios&action=create" class="btn">
+    <a href="index.php?page=horarios&action=create" class="btn">
       <i class="ti ti-calendar-plus"></i> Agregar horario
     </a>
-    <a href="/index.php?page=seguimiento" class="btn">
+    <a href="index.php?page=seguimiento" class="btn">
       <i class="ti ti-chart-bar"></i> Ver seguimiento
     </a>
     <?php if (Auth::isCoord()): ?>
-    <a href="/index.php?page=docentes&action=create" class="btn">
+    <a href="index.php?page=docentes&action=create" class="btn">
       <i class="ti ti-user-plus"></i> Nuevo docente
     </a>
     <?php endif; ?>

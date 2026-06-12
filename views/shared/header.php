@@ -10,7 +10,7 @@
   <!-- Tabler Icons -->
   <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" rel="stylesheet">
   <!-- Estilos propios -->
-  <link href="/assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/main.css" rel="stylesheet">
 </head>
 <body>
 
@@ -25,25 +25,25 @@
     <li class="nav-section">Principal</li>
 
     <li class="nav-item <?= ($activePage ?? '') === 'dashboard'   ? 'active' : '' ?>">
-      <a href="/index.php?page=dashboard">
+      <a href="index.php?page=dashboard">
         <i class="ti ti-home"></i><span>Dashboard</span>
       </a>
     </li>
 
     <li class="nav-item <?= ($activePage ?? '') === 'temas'       ? 'active' : '' ?>">
-      <a href="/index.php?page=temas">
+      <a href="index.php?page=temas">
         <i class="ti ti-book"></i><span>Registrar tema</span>
       </a>
     </li>
 
     <li class="nav-item <?= ($activePage ?? '') === 'horarios'    ? 'active' : '' ?>">
-      <a href="/index.php?page=horarios">
+      <a href="index.php?page=horarios">
         <i class="ti ti-calendar"></i><span>Horarios</span>
       </a>
     </li>
 
     <li class="nav-item <?= ($activePage ?? '') === 'seguimiento' ? 'active' : '' ?>">
-      <a href="/index.php?page=seguimiento">
+      <a href="index.php?page=seguimiento">
         <i class="ti ti-chart-bar"></i><span>Seguimiento</span>
       </a>
     </li>
@@ -52,25 +52,25 @@
     <li class="nav-section">Administración</li>
 
     <li class="nav-item <?= ($activePage ?? '') === 'docentes'    ? 'active' : '' ?>">
-      <a href="/index.php?page=docentes">
+      <a href="index.php?page=docentes">
         <i class="ti ti-users"></i><span>Docentes</span>
       </a>
     </li>
 
     <li class="nav-item <?= ($activePage ?? '') === 'grupos'      ? 'active' : '' ?>">
-      <a href="/index.php?page=grupos">
+      <a href="index.php?page=grupos">
         <i class="ti ti-users-group"></i><span>Grupos</span>
       </a>
     </li>
 
     <li class="nav-item <?= ($activePage ?? '') === 'areas'       ? 'active' : '' ?>">
-      <a href="/index.php?page=areas">
+      <a href="index.php?page=areas">
         <i class="ti ti-tag"></i><span>Áreas temáticas</span>
       </a>
     </li>
 
     <li class="nav-item <?= ($activePage ?? '') === 'salones'     ? 'active' : '' ?>">
-      <a href="/index.php?page=salones">
+      <a href="index.php?page=salones">
         <i class="ti ti-door"></i><span>Salones</span>
       </a>
     </li>
@@ -85,7 +85,7 @@
         <span class="user-role"><?= Auth::user()['rol'] === 'coordinador' ? 'Coordinador' : 'Docente' ?></span>
       </div>
     </div>
-    <a href="/index.php?page=logout" class="btn-logout" title="Cerrar sesión">
+    <a href="index.php?page=logout" class="btn-logout" title="Cerrar sesión">
       <i class="ti ti-logout"></i>
     </a>
   </div>

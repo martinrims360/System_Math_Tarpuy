@@ -5,7 +5,7 @@
     <h1><i class="ti ti-users" style="color:#534AB7;vertical-align:-3px;margin-right:8px"></i>Docentes</h1>
     <p>Gestión de usuarios del sistema</p>
   </div>
-  <a href="/index.php?page=docentes&action=create" class="btn btn-primary">
+  <a href="index.php?page=docentes&action=create" class="btn btn-primary">
     <i class="ti ti-user-plus"></i> Nuevo docente
   </a>
 </div>
@@ -15,7 +15,7 @@
     <div class="empty-state">
       <i class="ti ti-users-off"></i>
       <p>No hay docentes registrados aún.</p>
-      <a href="/index.php?page=docentes&action=create" class="btn btn-primary" style="margin-top:14px">
+      <a href="index.php?page=docentes&action=create" class="btn btn-primary" style="margin-top:14px">
         <i class="ti ti-user-plus"></i> Registrar primer docente
       </a>
     </div>
@@ -75,11 +75,11 @@
             </td>
             <td>
               <div style="display:flex;gap:6px">
-                <a href="/index.php?page=docentes&action=edit&id=<?= $d['id_docente'] ?>"
+                <a href="index.php?page=docentes&action=edit&id=<?= $d['id_docente'] ?>"
                    class="btn btn-sm" title="Editar">
                   <i class="ti ti-edit"></i>
                 </a>
-                <a href="/index.php?page=docentes&action=toggle&id=<?= $d['id_docente'] ?>"
+                <a href="index.php?page=docentes&action=toggle&id=<?= $d['id_docente'] ?>"
                    class="btn btn-sm" title="<?= $d['estado']==1 ? 'Desactivar' : 'Activar' ?>">
                   <i class="ti ti-power <?= $d['estado']==1 ? '' : 'ti-rotate-90' ?>"
                      style="color:<?= $d['estado']==1 ? '#C0392B' : '#1D9E75' ?>"></i>
@@ -87,7 +87,7 @@
                 <?php if ($d['id_docente'] !== Auth::user()['id']): ?>
                   <button class="btn btn-sm btn-danger" title="Eliminar"
                           onclick="confirmDelete(
-                            '/index.php?page=docentes&action=delete&id=<?= $d['id_docente'] ?>',
+                            'index.php?page=docentes&action=delete&id=<?= $d['id_docente'] ?>',
                             '<?= addslashes($d['nombre']) ?>')">
                     <i class="ti ti-trash"></i>
                   </button>

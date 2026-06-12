@@ -12,7 +12,7 @@ $accion    = $esEdicion ? 'update' : 'store';
     </h1>
     <p><?= $esEdicion ? 'Modifica los datos del docente' : 'Completa el formulario para registrar un docente' ?></p>
   </div>
-  <a href="/index.php?page=docentes" class="btn">
+  <a href="index.php?page=docentes" class="btn">
     <i class="ti ti-arrow-left"></i> Volver
   </a>
 </div>
@@ -34,7 +34,7 @@ $accion    = $esEdicion ? 'update' : 'store';
 
 <div class="card">
   <form method="POST"
-        action="/index.php?page=docentes&action=<?= $accion ?>">
+        action="index.php?page=docentes&action=<?= $accion ?>">
 
     <?php if ($esEdicion): ?>
       <input type="hidden" name="id" value="<?= $docente['id_docente'] ?>">
@@ -46,7 +46,7 @@ $accion    = $esEdicion ? 'update' : 'store';
       <div class="form-group form-full">
         <label>Nombre completo <span style="color:#C0392B">*</span></label>
         <input type="text" name="nombre" required
-               placeholder="Ej: Martín Rimachi Quispe"
+               placeholder="Ej: Martín Rimachi Taipe"
                value="<?= htmlspecialchars($docente['nombre'] ?? $_POST['nombre'] ?? '') ?>">
       </div>
 
@@ -103,7 +103,7 @@ $accion    = $esEdicion ? 'update' : 'store';
     </div><!-- /form-grid -->
 
     <div class="form-actions">
-      <a href="/index.php?page=docentes" class="btn">Cancelar</a>
+      <a href="index.php?page=docentes" class="btn">Cancelar</a>
       <button type="submit" class="btn btn-primary">
         <i class="ti ti-<?= $esEdicion ? 'device-floppy' : 'user-plus' ?>"></i>
         <?= $esEdicion ? 'Guardar cambios' : 'Registrar docente' ?>
