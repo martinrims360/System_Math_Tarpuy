@@ -46,7 +46,7 @@ class DocenteController {
                     'estado'   => isset($_POST['estado']) ? 1 : 0,
                 ]);
                 $_SESSION['flash_success'] = 'Docente registrado correctamente.';
-                header('Location: /index.php?page=docentes');
+                header('Location: index.php?page=docentes');
                 exit;
             } catch (PDOException $e) {
                 $errors[] = str_contains($e->getMessage(), 'unique') || str_contains($e->getMessage(), 'duplicate')
@@ -72,7 +72,7 @@ class DocenteController {
 
         if (!$docente) {
             $_SESSION['flash_error'] = 'Docente no encontrado.';
-            header('Location: /index.php?page=docentes');
+            header('Location: index.php?page=docentes');
             exit;
         }
 
@@ -93,7 +93,7 @@ class DocenteController {
 
         if (!$docente) {
             $_SESSION['flash_error'] = 'Docente no encontrado.';
-            header('Location: /index.php?page=docentes');
+            header('Location: index.php?page=docentes');
             exit;
         }
 
@@ -119,7 +119,7 @@ class DocenteController {
 
                 if (empty($errors)) {
                     $_SESSION['flash_success'] = 'Docente actualizado correctamente.';
-                    header('Location: /index.php?page=docentes');
+                    header('Location: index.php?page=docentes');
                     exit;
                 }
             } catch (PDOException $e) {
@@ -144,13 +144,13 @@ class DocenteController {
         // Evitar desactivarse a sí mismo
         if ($id === Auth::user()['id']) {
             $_SESSION['flash_error'] = 'No puedes desactivar tu propia cuenta.';
-            header('Location: /index.php?page=docentes');
+            header('Location: index.php?page=docentes');
             exit;
         }
 
         Docente::toggleEstado($id);
         $_SESSION['flash_success'] = 'Estado del docente actualizado.';
-        header('Location: /index.php?page=docentes');
+        header('Location: index.php?page=docentes');
         exit;
     }
 
@@ -161,7 +161,7 @@ class DocenteController {
 
         if ($id === Auth::user()['id']) {
             $_SESSION['flash_error'] = 'No puedes eliminar tu propia cuenta.';
-            header('Location: /index.php?page=docentes');
+            header('Location: index.php?page=docentes');
             exit;
         }
 
@@ -172,7 +172,7 @@ class DocenteController {
             $_SESSION['flash_error'] = 'No se puede eliminar: el docente tiene registros asociados.';
         }
 
-        header('Location: /index.php?page=docentes');
+        header('Location: index.php?page=docentes');
         exit;
     }
 
