@@ -74,7 +74,7 @@ class TemaController {
                     'observaciones' => $_POST['observaciones'] ?? '',
                 ]);
                 $_SESSION['flash_success'] = 'Tema registrado correctamente.';
-                header('Location: /index.php?page=temas');
+                header('Location: index.php?page=temas');
                 exit;
             } catch (PDOException $e) {
                 $errors[] = 'Error al guardar. Intente nuevamente.';
@@ -102,14 +102,14 @@ class TemaController {
 
         if (!$tema) {
             $_SESSION['flash_error'] = 'Registro no encontrado.';
-            header('Location: /index.php?page=temas');
+            header('Location: index.php?page=temas');
             exit;
         }
 
         // Docente solo puede editar sus propios registros
         if (!Auth::isCoord() && $tema['id_docente'] != Auth::user()['id']) {
             $_SESSION['flash_error'] = 'No tienes permiso para editar este registro.';
-            header('Location: /index.php?page=temas');
+            header('Location: index.php?page=temas');
             exit;
         }
 
@@ -134,13 +134,13 @@ class TemaController {
 
         if (!$tema) {
             $_SESSION['flash_error'] = 'Registro no encontrado.';
-            header('Location: /index.php?page=temas');
+            header('Location: index.php?page=temas');
             exit;
         }
 
         if (!Auth::isCoord() && $tema['id_docente'] != Auth::user()['id']) {
             $_SESSION['flash_error'] = 'No tienes permiso para editar este registro.';
-            header('Location: /index.php?page=temas');
+            header('Location: index.php?page=temas');
             exit;
         }
 
@@ -159,7 +159,7 @@ class TemaController {
                 'observaciones' => $_POST['observaciones'] ?? '',
             ]);
             $_SESSION['flash_success'] = 'Tema actualizado correctamente.';
-            header('Location: /index.php?page=temas');
+            header('Location: index.php?page=temas');
             exit;
         }
 
@@ -183,19 +183,19 @@ class TemaController {
 
         if (!$tema) {
             $_SESSION['flash_error'] = 'Registro no encontrado.';
-            header('Location: /index.php?page=temas');
+            header('Location: index.php?page=temas');
             exit;
         }
 
         if (!Auth::isCoord() && $tema['id_docente'] != Auth::user()['id']) {
             $_SESSION['flash_error'] = 'No tienes permiso para eliminar este registro.';
-            header('Location: /index.php?page=temas');
+            header('Location: index.php?page=temas');
             exit;
         }
 
         Tema::delete($id);
         $_SESSION['flash_success'] = 'Registro eliminado.';
-        header('Location: /index.php?page=temas');
+        header('Location: index.php?page=temas');
         exit;
     }
 

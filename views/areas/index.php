@@ -26,7 +26,7 @@ $colores = [
     <div class="empty-state">
       <i class="ti ti-tag" style="font-size:40px"></i>
       <p>No hay áreas registradas aún.</p>
-      <a href="/index.php?page=areas&action=create" class="btn btn-primary" style="margin-top:14px">
+      <a href="index.php?page=areas&action=create" class="btn btn-primary" style="margin-top:14px">
         <i class="ti ti-plus"></i> Crear primera área
       </a>
     </div>
@@ -34,7 +34,7 @@ $colores = [
 <?php else: ?>
 
   <!-- Cards de áreas -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px">
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:20px">
     <?php foreach ($areas as $i => $a):
       $c = $colores[$i % count($colores)];
     ?>
@@ -45,8 +45,7 @@ $colores = [
           <i class="ti ti-math"></i>
         </div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:13.5px;font-weight:500;white-space:nowrap;
-                      overflow:hidden;text-overflow:ellipsis">
+          <div style="font-size:13.5px;font-weight:700;white-space:nowrap">
             <?= htmlspecialchars($a['nombre']) ?>
           </div>
         </div>

@@ -74,7 +74,7 @@ class HorarioController {
                     'observaciones'=> $_POST['observaciones'] ?? '',
                 ]);
                 $_SESSION['flash_success'] = 'Horario registrado correctamente.';
-                header('Location: /index.php?page=horarios');
+                header('Location: index.php?page=horarios');
                 exit;
             } catch (PDOException $e) {
                 $errors[] = 'Error al guardar. Intente nuevamente.';
@@ -102,13 +102,13 @@ class HorarioController {
 
         if (!$horario) {
             $_SESSION['flash_error'] = 'Horario no encontrado.';
-            header('Location: /index.php?page=horarios');
+            header('Location: index.php?page=horarios');
             exit;
         }
 
         if (!Auth::isCoord() && $horario['id_docente'] != Auth::user()['id']) {
             $_SESSION['flash_error'] = 'No tienes permiso para editar este horario.';
-            header('Location: /index.php?page=horarios');
+            header('Location: index.php?page=horarios');
             exit;
         }
 
@@ -133,13 +133,13 @@ class HorarioController {
 
         if (!$horario) {
             $_SESSION['flash_error'] = 'Horario no encontrado.';
-            header('Location: /index.php?page=horarios');
+            header('Location: index.php?page=horarios');
             exit;
         }
 
         if (!Auth::isCoord() && $horario['id_docente'] != Auth::user()['id']) {
             $_SESSION['flash_error'] = 'No tienes permiso para editar este horario.';
-            header('Location: /index.php?page=horarios');
+            header('Location: index.php?page=horarios');
             exit;
         }
 
@@ -158,7 +158,7 @@ class HorarioController {
                 'observaciones'=> $_POST['observaciones'] ?? '',
             ]);
             $_SESSION['flash_success'] = 'Horario actualizado correctamente.';
-            header('Location: /index.php?page=horarios');
+            header('Location: index.php?page=horarios');
             exit;
         }
 
@@ -182,19 +182,19 @@ class HorarioController {
 
         if (!$horario) {
             $_SESSION['flash_error'] = 'Horario no encontrado.';
-            header('Location: /index.php?page=horarios');
+            header('Location: index.php?page=horarios');
             exit;
         }
 
         if (!Auth::isCoord() && $horario['id_docente'] != Auth::user()['id']) {
             $_SESSION['flash_error'] = 'No tienes permiso para eliminar este horario.';
-            header('Location: /index.php?page=horarios');
+            header('Location: index.php?page=horarios');
             exit;
         }
 
         Horario::delete($id);
         $_SESSION['flash_success'] = 'Horario eliminado.';
-        header('Location: /index.php?page=horarios');
+        header('Location: index.php?page=horarios');
         exit;
     }
 

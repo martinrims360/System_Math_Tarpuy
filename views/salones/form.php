@@ -27,7 +27,7 @@ $accion    = $esEdicion ? 'update' : 'store';
 <?php endif; ?>
 
 <div class="card" style="max-width:560px">
-  <form method="POST" action="/index.php?page=salones&action=<?= $accion ?>">
+  <form method="POST" action="index.php?page=salones&action=<?= $accion ?>">
     <?php if ($esEdicion): ?>
       <input type="hidden" name="id" value="<?= $salon['id_salon'] ?>">
     <?php endif; ?>

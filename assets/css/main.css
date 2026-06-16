@@ -2,8 +2,8 @@
 
 /* ── Variables ─────────────────────────────────────────── */
 :root {
-  --color-primary:   #534AB7;
-  --color-primary-d: #3C3489;
+  --color-primary:   #1a76ff;
+  --color-primary-d: #1903e4;
   --color-primary-l: #EEEDFE;
 
   --color-success:   #1D9E75;
@@ -51,7 +51,7 @@ a { text-decoration: none; color: inherit; }
   top: 0; left: 0;
   width: var(--sidebar-w);
   height: 100vh;
-  background: #1E1B4B;
+  background: #357cff;
   display: flex;
   flex-direction: column;
   z-index: 200;
@@ -63,7 +63,7 @@ a { text-decoration: none; color: inherit; }
   align-items: center;
   gap: 10px;
   padding: 20px 20px 16px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(252, 48, 48, 0.08);
 }
 
 .brand-icon {
@@ -419,7 +419,7 @@ table.sys-table {
 .form-group textarea:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(83,74,183,.12);
+  box-shadow: 0 0 0 3px rgba(19, 171, 231, 0.12);
 }
 
 .form-group textarea { resize: vertical; min-height: 72px; }
