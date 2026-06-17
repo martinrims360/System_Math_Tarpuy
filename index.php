@@ -1,11 +1,19 @@
 <?php
-    // index.php — router principal
+// index.php — router principal
+
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/helpers/Auth.php';
 
 Auth::start();
 
 $page = $_GET['page'] ?? 'dashboard';
+
+// Cerrar sesión — se maneja antes del resto
+if ($page === 'logout') {
+    Auth::logout();
+    header('Location: index.php?page=login');
+    exit;
+}
 
 // Rutas públicas (sin sesión)
 $public = ['login'];
@@ -17,7 +25,6 @@ if (!in_array($page, $public)) {
 // Mapa de página → controlador
 $routes = [
     'login'         => ['controllers/AuthController.php',     'AuthController'],
-    'logout'        => ['controllers/AuthController.php',     'AuthController'],
     'dashboard'     => ['controllers/DashboardController.php','DashboardController'],
     // Docentes
     'docentes'      => ['controllers/DocenteController.php',  'DocenteController'],
