@@ -40,6 +40,8 @@ $routes = [
     'horarios'      => ['controllers/HorarioController.php',  'HorarioController'],
     // Seguimiento
     'seguimiento'   => ['controllers/SeguimientoController.php','SeguimientoController'],
+    // Asistencia
+    'asistencia'   => ['controllers/AsistenciaController.php','AsistenciaController'],
 ];
 
 if (!isset($routes[$page])) {

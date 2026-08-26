@@ -48,7 +48,14 @@
       </a>
     </li>
 
+    <li class="nav-item <?= ($activePage ?? '') === 'asistencia'  ? 'active' : '' ?>">
+      <a href="index.php?page=asistencia">
+        <i class="ti ti-calendar-check"></i><span>Asistencia</span>
+      </a>
+    </li>
+
     <?php if (Auth::isCoord()): ?>
+
     <li class="nav-section">Administración</li>
 
     <li class="nav-item <?= ($activePage ?? '') === 'docentes'    ? 'active' : '' ?>">
