@@ -52,7 +52,7 @@
             <td>
               <span class="badge-status <?= $g['estado']==1 ? 'active' : 'inactive' ?>">
                 <?= $g['estado']==1 ? 'Activo' : 'Inactivo' ?>
-              </span>
+              </span>  
             </td>
             <td>
               <div style="display:flex;gap:6px">

@@ -140,7 +140,7 @@ $totalTemas   = array_sum(array_column($porArea, 'total_temas'));
   </div>
 
   <!-- Filtros -->
-  <form method="GET" action="/index.php"
+  <form method="GET" action="index.php"
         style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;
                margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #F1F3F5">
     <input type="hidden" name="page" value="seguimiento">

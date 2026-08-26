@@ -163,7 +163,7 @@ foreach ($horariosList as $h) {
                         border-radius:8px;padding:6px 8px;margin-bottom:3px;
                         cursor:pointer;transition:opacity .15s"
                  title="<?= htmlspecialchars($b['docente'].' · '.$b['grupo'].' · '.$b['salon']) ?>"
-                 onclick="window.location='/index.php?page=horarios&action=edit&id=<?= $b['id_horario'] ?>'">
+                 onclick="window.location='index.php?page=horarios&action=edit&id=<?= $b['id_horario'] ?>'">
               <div style="font-size:12px;font-weight:600;color:<?= $c['text'] ?>;
                           white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
                 <?= htmlspecialchars(explode(' ',$b['docente'])[0]) ?>
