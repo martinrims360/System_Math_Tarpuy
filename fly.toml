@@ -1,20 +1,20 @@
-# fly.toml
-# NOTA: al correr "fly launch" este archivo se genera/edita automáticamente.
-# Este es solo un ejemplo de referencia — revisa "app" y "primary_region"
-# con los valores reales que elijas durante "fly launch".
+# fly.toml app configuration file generated for system-math-tarpuy on 2026-08-28T21:12:10Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = "concursos-mat"        # cámbialo por el nombre que uses en fly launch
-primary_region = "qro"       # región más cercana a Perú suele ser qro (México) o gru (Brasil)
+app = 'system-math-tarpuy'
+primary_region = 'dfw'
 
 [build]
 
 [http_service]
   internal_port = 80
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
 
 [[vm]]
-  size = "shared-cpu-1x"
-  memory = "512mb"
+  size = 'shared-cpu-1x'
+  memory = '512mb'
