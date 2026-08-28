@@ -1,7 +1,12 @@
 # Dockerfile
 FROM php:8.2-apache
 
-# Extensiones necesarias para conectar a Supabase (PostgreSQL) vía PDO
+# Librerías de sistema necesarias para compilar pdo_pgsql (PostgreSQL)
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Extensiones necesarias para conectar a Neon (PostgreSQL) vía PDO
 RUN docker-php-ext-install pdo pdo_pgsql pgsql
 
 # Copiar el proyecto al servidor web
