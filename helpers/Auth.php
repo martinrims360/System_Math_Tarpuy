@@ -1,5 +1,5 @@
 <?php
-// helpers/Auth.php
+// helpers/Auth.php.
 
 class Auth {
 
@@ -31,7 +31,7 @@ class Auth {
 
     public static function requireLogin(): void {
         if (!self::check()) {
-            header('Location:concursos_mat/index.php?page=login');
+            header('Location:/index.php?page=login');
             exit;
         }
     }
@@ -39,7 +39,7 @@ class Auth {
     public static function requireCoord(): void {
         self::requireLogin();
         if ($_SESSION['rol'] !== 'coordinador') {
-            header('Location:concursos_mat/index.php?page=dashboard');
+            header('Location:/index.php?page=dashboard');
             exit;
         }
     }
