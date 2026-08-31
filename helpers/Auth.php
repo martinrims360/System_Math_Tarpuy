@@ -1,5 +1,5 @@
 <?php
-// helpers/Auth.php.
+// helpers/Auth.php.AAAAA
 
 class Auth {
 
