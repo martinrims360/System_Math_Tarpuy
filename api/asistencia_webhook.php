@@ -41,64 +41,48 @@ if (empty($nombreForm)) {
 
 $db = getDB();
 
-// --- BUSCAR DOCENTE (VERSIÓN MEJORADA) ---
+// --- BUSCAR DOCENTE (CON LOGS) ---
 function buscarDocenteId(PDO $db, string $nombreForm): ?int {
     // Eliminar prefijos comunes
     $nombreLimpio = preg_replace('/^\s*(profesor|profesora|prof\.?|docente|teacher)\s+/i', '', $nombreForm);
     $nombreLimpio = trim($nombreLimpio);
     
+    error_log("[asistencia_webhook] Buscando docente: '{$nombreForm}' → limpio: '{$nombreLimpio}'");
+    
     // 1) Coincidencia exacta (ignorando mayúsculas/minúsculas)
     $stmt = $db->prepare(
-        'SELECT id_docente FROM docentes WHERE LOWER(TRIM(nombre)) = LOWER(:n) LIMIT 1'
+        'SELECT id_docente, nombre FROM docentes WHERE LOWER(TRIM(nombre)) = LOWER(:n) LIMIT 1'
     );
     $stmt->execute([':n' => $nombreLimpio]);
-    $id = $stmt->fetchColumn();
-    if ($id) return (int) $id;
+    $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($resultado) {
+        error_log("[asistencia_webhook] ✅ Coincidencia exacta: ID={$resultado['id_docente']}, Nombre='{$resultado['nombre']}'");
+        return (int) $resultado['id_docente'];
+    }
     
     // 2) Coincidencia exacta con el nombre original (sin limpiar)
     $stmt = $db->prepare(
-        'SELECT id_docente FROM docentes WHERE LOWER(TRIM(nombre)) = LOWER(:n) LIMIT 1'
+        'SELECT id_docente, nombre FROM docentes WHERE LOWER(TRIM(nombre)) = LOWER(:n) LIMIT 1'
     );
     $stmt->execute([':n' => $nombreForm]);
-    $id = $stmt->fetchColumn();
-    if ($id) return (int) $id;
+    $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($resultado) {
+        error_log("[asistencia_webhook] ✅ Coincidencia exacta (original): ID={$resultado['id_docente']}, Nombre='{$resultado['nombre']}'");
+        return (int) $resultado['id_docente'];
+    }
     
     // 3) Coincidencia parcial (el nombre del Form está contenido en el nombre de la BD)
     $stmt = $db->prepare(
-        'SELECT id_docente FROM docentes WHERE LOWER(nombre) LIKE LOWER(:n) LIMIT 1'
+        'SELECT id_docente, nombre FROM docentes WHERE LOWER(nombre) LIKE LOWER(:n) LIMIT 1'
     );
     $stmt->execute([':n' => '%' . $nombreLimpio . '%']);
-    $id = $stmt->fetchColumn();
-    if ($id) return (int) $id;
-    
-    // 4) Coincidencia por primera palabra (nombre de pila)
-    $primeraPalabra = strtok($nombreLimpio, ' ');
-    if ($primeraPalabra && strlen($primeraPalabra) >= 3) {
-        $stmt = $db->prepare(
-            'SELECT id_docente FROM docentes WHERE LOWER(nombre) LIKE LOWER(:n)'
-        );
-        $stmt->execute([':n' => '%' . $primeraPalabra . '%']);
-        $coincidencias = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        if (count($coincidencias) === 1) {
-            return (int) $coincidencias[0];
-        }
+    $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($resultado) {
+        error_log("[asistencia_webhook] ✅ Coincidencia parcial: ID={$resultado['id_docente']}, Nombre='{$resultado['nombre']}'");
+        return (int) $resultado['id_docente'];
     }
     
-    // 5) Coincidencia por cualquiera de las palabras del nombre
-    $partes = explode(' ', $nombreLimpio);
-    foreach ($partes as $parte) {
-        if (strlen($parte) >= 3) {
-            $stmt = $db->prepare(
-                'SELECT id_docente FROM docentes WHERE LOWER(nombre) LIKE LOWER(:n)'
-            );
-            $stmt->execute([':n' => '%' . $parte . '%']);
-            $coincidencias = $stmt->fetchAll(PDO::FETCH_COLUMN);
-            if (count($coincidencias) === 1) {
-                return (int) $coincidencias[0];
-            }
-        }
-    }
-    
+    error_log("[asistencia_webhook] ❌ No se encontró ningún docente para: '{$nombreForm}'");
     return null;
 }
 
@@ -106,15 +90,19 @@ function buscarDocenteId(PDO $db, string $nombreForm): ?int {
 $idDocente = buscarDocenteId($db, $nombreForm);
 
 if (!$idDocente) {
-    error_log("[asistencia_webhook] Docente no encontrado: '{$nombreForm}'");
-    responder(404, ['ok' => false, 'error' => "No se encontró un docente que coincida con '{$nombreForm}'"]);
+    responder(404, [
+        'ok' => false, 
+        'error' => "No se encontró un docente que coincida con '{$nombreForm}'",
+        'nombre_buscado' => $nombreForm
+    ]);
 }
 
 // --- Obtener datos ---
 $fecha = $body['fecha'] ?? date('Y-m-d');
 $hora  = $body['hora']  ?? date('H:i:s');
 $observaciones = $body['observaciones'] ?? '';
-$ahora = date('Y-m-d H:i:s'); // Para created_at
+
+error_log("[asistencia_webhook] Procesando: id_docente={$idDocente}, fecha={$fecha}, accion={$accion}");
 
 try {
     // Verificar si ya existe un registro para este docente y fecha
@@ -132,8 +120,7 @@ try {
                 UPDATE asistencias 
                 SET hora_entrada = :hora, 
                     estado = :estado,
-                    observaciones = COALESCE(NULLIF(:observaciones, \'\'), observaciones),
-                    created_at = :created_at
+                    observaciones = COALESCE(NULLIF(:observaciones, \'\'), observaciones)
                 WHERE id_docente = :id_docente AND fecha = :fecha
             ');
             $stmt->execute([
@@ -141,13 +128,13 @@ try {
                 ':fecha'         => $fecha,
                 ':hora'          => $hora,
                 ':estado'        => $estado,
-                ':observaciones' => $observaciones,
-                ':created_at'    => $ahora
+                ':observaciones' => $observaciones
             ]);
+            error_log("[asistencia_webhook] ✅ Registro ACTUALIZADO (entrada) para id_docente={$idDocente}");
         } else {
             $stmt = $db->prepare('
-                INSERT INTO asistencias (id_docente, fecha, hora_entrada, estado, observaciones, registrado_por, created_at)
-                VALUES (:id_docente, :fecha, :hora, :estado, :observaciones, :registrado_por, :created_at)
+                INSERT INTO asistencias (id_docente, fecha, hora_entrada, estado, observaciones, registrado_por)
+                VALUES (:id_docente, :fecha, :hora, :estado, :observaciones, :registrado_por)
             ');
             $stmt->execute([
                 ':id_docente'    => $idDocente,
@@ -155,9 +142,9 @@ try {
                 ':hora'          => $hora,
                 ':estado'        => $estado,
                 ':observaciones' => $observaciones,
-                ':registrado_por' => 'formulario',
-                ':created_at'    => $ahora
+                ':registrado_por' => 'formulario'
             ]);
+            error_log("[asistencia_webhook] ✅ Registro INSERTADO (entrada) para id_docente={$idDocente}");
         }
         
     } else {
@@ -166,21 +153,20 @@ try {
             $stmt = $db->prepare('
                 UPDATE asistencias 
                 SET hora_salida = :hora,
-                    observaciones = COALESCE(NULLIF(:observaciones, \'\'), observaciones),
-                    created_at = :created_at
+                    observaciones = COALESCE(NULLIF(:observaciones, \'\'), observaciones)
                 WHERE id_docente = :id_docente AND fecha = :fecha
             ');
             $stmt->execute([
                 ':id_docente'    => $idDocente,
                 ':fecha'         => $fecha,
                 ':hora'          => $hora,
-                ':observaciones' => $observaciones,
-                ':created_at'    => $ahora
+                ':observaciones' => $observaciones
             ]);
+            error_log("[asistencia_webhook] ✅ Registro ACTUALIZADO (salida) para id_docente={$idDocente}");
         } else {
             $stmt = $db->prepare('
-                INSERT INTO asistencias (id_docente, fecha, hora_salida, estado, observaciones, registrado_por, created_at)
-                VALUES (:id_docente, :fecha, :hora, :estado, :observaciones, :registrado_por, :created_at)
+                INSERT INTO asistencias (id_docente, fecha, hora_salida, estado, observaciones, registrado_por)
+                VALUES (:id_docente, :fecha, :hora, :estado, :observaciones, :registrado_por)
             ');
             $stmt->execute([
                 ':id_docente'    => $idDocente,
@@ -188,19 +174,21 @@ try {
                 ':hora'          => $hora,
                 ':estado'        => 'asistio',
                 ':observaciones' => $observaciones,
-                ':registrado_por' => 'formulario',
-                ':created_at'    => $ahora
+                ':registrado_por' => 'formulario'
             ]);
+            error_log("[asistencia_webhook] ✅ Registro INSERTADO (salida) para id_docente={$idDocente}");
         }
     }
 
     responder(200, ['ok' => true]);
     
 } catch (PDOException $e) {
-    error_log("[asistencia_webhook] Error SQL: " . $e->getMessage());
+    error_log("[asistencia_webhook] ❌ ERROR SQL: " . $e->getMessage());
     responder(500, [
         'ok' => false, 
         'error' => 'Error al guardar en base de datos',
-        'sql_error' => $e->getMessage()
+        'sql_error' => $e->getMessage(),
+        'id_docente' => $idDocente,
+        'fecha' => $fecha
     ]);
 }
