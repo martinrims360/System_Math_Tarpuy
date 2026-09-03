@@ -148,7 +148,7 @@ try {
             // Insertar nuevo registro
             $stmt = $db->prepare('
                 INSERT INTO asistencias (id_docente, fecha, hora_entrada, estado, observaciones, registrado_por)
-                VALUES (:id_docente, :fecha, :hora, :estado, :observaciones, \'formulario\')
+                VALUES (:id_docente, :fecha, :hora, :estado, :observaciones, :registrado_por)
             ');
             $stmt->execute([
                 ':id_docente'    => $idDocente,
@@ -156,6 +156,7 @@ try {
                 ':hora'          => $hora,
                 ':estado'        => $estado,
                 ':observaciones' => $observaciones,
+                ':registrado_por' => 'formulario'
             ]);
         }
         
@@ -179,13 +180,15 @@ try {
             // Insertar nuevo registro (solo salida, estado por defecto 'asistio')
             $stmt = $db->prepare('
                 INSERT INTO asistencias (id_docente, fecha, hora_salida, estado, observaciones, registrado_por)
-                VALUES (:id_docente, :fecha, :hora, \'asistio\', :observaciones, \'formulario\')
+                VALUES (:id_docente, :fecha, :hora, :estado, :observaciones, :registrado_por)
             ');
             $stmt->execute([
                 ':id_docente'    => $idDocente,
                 ':fecha'         => $fecha,
                 ':hora'          => $hora,
+                ':estado'        => 'asistio',
                 ':observaciones' => $observaciones,
+                ':registrado_por' => 'formulario'
             ]);
         }
     }
@@ -193,8 +196,18 @@ try {
     responder(200, ['ok' => true]);
     
 } catch (PDOException $e) {
-    // Log del error real para depuración
+    // DEVOLVER EL ERROR REAL PARA DEPURACIÓN
+    $errorDetails = [
+        'ok' => false,
+        'error' => $e->getMessage(),
+        'code' => $e->getCode(),
+        'id_docente' => $idDocente,
+        'fecha' => $fecha,
+        'accion' => $accion
+    ];
+    
     error_log("[asistencia_webhook] Error SQL: " . $e->getMessage());
-    error_log("[asistencia_webhook] Datos: id_docente={$idDocente}, fecha={$fecha}, accion={$accion}");
-    responder(500, ['ok' => false, 'error' => 'Error al guardar en base de datos: ' . $e->getMessage()]);
+    error_log("[asistencia_webhook] Detalles: " . json_encode($errorDetails));
+    
+    responder(500, $errorDetails);
 }
