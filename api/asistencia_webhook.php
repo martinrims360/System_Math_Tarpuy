@@ -1,22 +1,5 @@
 <?php
 // api/asistencia_webhook.php
-//
-// Recibe un POST en JSON desde el Apps Script vinculado al Google Sheet
-// cada vez que un docente llena el Google Form de asistencia.
-//
-// El docente se identifica por NOMBRE (texto libre tal como lo escribe
-// en el Form), no por correo. Se hace un emparejamiento por aproximación
-// contra docentes.nombre.
-//
-// JSON esperado (lo que debe enviar el Apps Script):
-// {
-//   "token":         "el mismo valor que 'webhook_token' en config/asistencia.php",
-//   "nombre":        "Rodil Arteaga",
-//   "accion":        "Hora de entrada" | "Hora de salida",
-//   "fecha":         "2026-09-03",
-//   "hora":          "12:35:00",
-//   "observaciones": "Prueba con logs" // opcional
-// }
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -58,48 +41,35 @@ if (empty($nombreForm)) {
 
 $db = getDB();
 
-// --- BUSCAR DOCENTE (VERSIÓN MEJORADA) ---
+// --- BUSCAR DOCENTE ---
 function buscarDocenteId(PDO $db, string $nombreForm): ?int {
-    // Eliminar prefijos comunes
     $nombreLimpio = preg_replace('/^\s*(profesor|profesora|prof\.?|docente|teacher)\s+/i', '', $nombreForm);
     $nombreLimpio = trim($nombreLimpio);
     
-    error_log("[asistencia_webhook] Buscando docente: '{$nombreForm}' → limpio: '{$nombreLimpio}'");
-    
-    // 1) Coincidencia exacta (ignorando mayúsculas/minúsculas)
+    // 1) Coincidencia exacta
     $stmt = $db->prepare(
         'SELECT id_docente, nombre FROM docentes WHERE LOWER(TRIM(nombre)) = LOWER(:n) LIMIT 1'
     );
     $stmt->execute([':n' => $nombreLimpio]);
     $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($resultado) {
-        error_log("[asistencia_webhook] ✅ Coincidencia exacta: ID={$resultado['id_docente']}, Nombre='{$resultado['nombre']}'");
-        return (int) $resultado['id_docente'];
-    }
+    if ($resultado) return (int) $resultado['id_docente'];
     
-    // 2) Coincidencia exacta con el nombre original (sin limpiar)
+    // 2) Coincidencia exacta con el nombre original
     $stmt = $db->prepare(
         'SELECT id_docente, nombre FROM docentes WHERE LOWER(TRIM(nombre)) = LOWER(:n) LIMIT 1'
     );
     $stmt->execute([':n' => $nombreForm]);
     $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($resultado) {
-        error_log("[asistencia_webhook] ✅ Coincidencia exacta (original): ID={$resultado['id_docente']}, Nombre='{$resultado['nombre']}'");
-        return (int) $resultado['id_docente'];
-    }
+    if ($resultado) return (int) $resultado['id_docente'];
     
-    // 3) Coincidencia parcial (el nombre del Form está contenido en el nombre de la BD)
+    // 3) Coincidencia parcial
     $stmt = $db->prepare(
         'SELECT id_docente, nombre FROM docentes WHERE LOWER(nombre) LIKE LOWER(:n) LIMIT 1'
     );
     $stmt->execute([':n' => '%' . $nombreLimpio . '%']);
     $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($resultado) {
-        error_log("[asistencia_webhook] ✅ Coincidencia parcial: ID={$resultado['id_docente']}, Nombre='{$resultado['nombre']}'");
-        return (int) $resultado['id_docente'];
-    }
+    if ($resultado) return (int) $resultado['id_docente'];
     
-    error_log("[asistencia_webhook] ❌ No se encontró ningún docente para: '{$nombreForm}'");
     return null;
 }
 
@@ -119,8 +89,6 @@ $fecha = $body['fecha'] ?? date('Y-m-d');
 $hora  = $body['hora']  ?? date('H:i:s');
 $observaciones = $body['observaciones'] ?? '';
 
-error_log("[asistencia_webhook] Procesando: id_docente={$idDocente}, fecha={$fecha}, accion={$accion}");
-
 try {
     // Verificar si ya existe un registro para este docente y fecha
     $stmt = $db->prepare('SELECT id_asistencia FROM asistencias WHERE id_docente = :id_docente AND fecha = :fecha');
@@ -128,7 +96,10 @@ try {
     $existe = $stmt->fetchColumn();
 
     if ($accion === 'Hora de entrada') {
-        // Calcular estado
+        // --- CALCULAR ESTADO CON LA NUEVA HORA LÍMITE ---
+        // Hora límite: 15:10:00 (3:10 PM)
+        // Antes de las 15:10:00 → asistio
+        // Después de las 15:10:00 → tardanza
         $horaLimite = $config['hora_limite_tardanza'] ?? '15:10:00';
         $estado = ($hora <= $horaLimite) ? 'asistio' : 'tardanza';
 
@@ -147,7 +118,6 @@ try {
                 ':estado'        => $estado,
                 ':observaciones' => $observaciones
             ]);
-            error_log("[asistencia_webhook] ✅ Registro ACTUALIZADO (entrada) para id_docente={$idDocente}");
         } else {
             $stmt = $db->prepare('
                 INSERT INTO asistencias (id_docente, fecha, hora_entrada, estado, observaciones, registrado_por)
@@ -161,7 +131,6 @@ try {
                 ':observaciones' => $observaciones,
                 ':registrado_por' => 'formulario'
             ]);
-            error_log("[asistencia_webhook] ✅ Registro INSERTADO (entrada) para id_docente={$idDocente}");
         }
         
     } else {
@@ -179,7 +148,6 @@ try {
                 ':hora'          => $hora,
                 ':observaciones' => $observaciones
             ]);
-            error_log("[asistencia_webhook] ✅ Registro ACTUALIZADO (salida) para id_docente={$idDocente}");
         } else {
             $stmt = $db->prepare('
                 INSERT INTO asistencias (id_docente, fecha, hora_salida, estado, observaciones, registrado_por)
@@ -193,7 +161,6 @@ try {
                 ':observaciones' => $observaciones,
                 ':registrado_por' => 'formulario'
             ]);
-            error_log("[asistencia_webhook] ✅ Registro INSERTADO (salida) para id_docente={$idDocente}");
         }
     }
 
