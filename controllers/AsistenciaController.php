@@ -24,8 +24,18 @@ class AsistenciaController {
         $idDocente = Auth::user()['id'];
         $hoy       = Asistencia::hoy($idDocente);
 
-        $mes  = (int)($_GET['mes']  ?? date('n'));
-        $anio = (int)($_GET['anio'] ?? date('Y'));
+        // --- CORREGIDO: Forzar Septiembre 2026 por defecto ---
+        // Esto asegura que se muestren los registros de Septiembre
+        $mes  = (int)($_GET['mes']  ?? 9);   // Septiembre
+        $anio = (int)($_GET['anio'] ?? 2026);
+        
+        // Si el usuario seleccionó otro mes, usar ese
+        if (isset($_GET['mes'])) {
+            $mes = (int)$_GET['mes'];
+        }
+        if (isset($_GET['anio'])) {
+            $anio = (int)$_GET['anio'];
+        }
 
         $historial = Asistencia::historialDocente($idDocente, ['mes' => $mes, 'anio' => $anio]);
         $resumen   = Asistencia::resumenDocente($idDocente, $mes, $anio);

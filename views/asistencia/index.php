@@ -65,6 +65,10 @@
 <?php
   $mesesNombres = [1=>'Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio',
                    'Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  
+  // Asegurar que mes y año tengan valores por defecto
+  if (!isset($mes)) $mes = 9;
+  if (!isset($anio)) $anio = 2026;
 ?>
 <form action="index.php" method="GET" style="display:flex;gap:10px;align-items:end;margin-bottom:14px;flex-wrap:wrap">
   <input type="hidden" name="page" value="asistencia">

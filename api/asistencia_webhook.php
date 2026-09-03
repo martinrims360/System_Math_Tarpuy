@@ -1,5 +1,22 @@
 <?php
 // api/asistencia_webhook.php
+//
+// Recibe un POST en JSON desde el Apps Script vinculado al Google Sheet
+// cada vez que un docente llena el Google Form de asistencia.
+//
+// El docente se identifica por NOMBRE (texto libre tal como lo escribe
+// en el Form), no por correo. Se hace un emparejamiento por aproximación
+// contra docentes.nombre.
+//
+// JSON esperado (lo que debe enviar el Apps Script):
+// {
+//   "token":         "el mismo valor que 'webhook_token' en config/asistencia.php",
+//   "nombre":        "Rodil Arteaga",
+//   "accion":        "Hora de entrada" | "Hora de salida",
+//   "fecha":         "2026-09-03",
+//   "hora":          "12:35:00",
+//   "observaciones": "Prueba con logs" // opcional
+// }
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -22,7 +39,7 @@ if (!is_array($body)) {
     responder(400, ['ok' => false, 'error' => 'JSON inválido']);
 }
 
-// --- Seguridad: token ---
+// --- Seguridad: token compartido ---
 if (!hash_equals($config['webhook_token'], (string)($body['token'] ?? ''))) {
     responder(401, ['ok' => false, 'error' => 'Token inválido']);
 }
@@ -33,7 +50,7 @@ if (!in_array($accion, ['Hora de entrada', 'Hora de salida'], true)) {
     responder(422, ['ok' => false, 'error' => 'Acción no válida']);
 }
 
-// --- Validar nombre ---
+// --- Validar nombre e identificar docente ---
 $nombreForm = trim($body['nombre'] ?? '');
 if (empty($nombreForm)) {
     responder(422, ['ok' => false, 'error' => 'Nombre requerido']);
@@ -41,7 +58,7 @@ if (empty($nombreForm)) {
 
 $db = getDB();
 
-// --- BUSCAR DOCENTE (CON LOGS) ---
+// --- BUSCAR DOCENTE (VERSIÓN MEJORADA) ---
 function buscarDocenteId(PDO $db, string $nombreForm): ?int {
     // Eliminar prefijos comunes
     $nombreLimpio = preg_replace('/^\s*(profesor|profesora|prof\.?|docente|teacher)\s+/i', '', $nombreForm);
@@ -187,8 +204,6 @@ try {
     responder(500, [
         'ok' => false, 
         'error' => 'Error al guardar en base de datos',
-        'sql_error' => $e->getMessage(),
-        'id_docente' => $idDocente,
-        'fecha' => $fecha
+        'sql_error' => $e->getMessage()
     ]);
 }
