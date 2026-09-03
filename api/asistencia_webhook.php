@@ -106,7 +106,6 @@ function buscarDocenteId(PDO $db, string $nombreForm): ?int {
 $idDocente = buscarDocenteId($db, $nombreForm);
 
 if (!$idDocente) {
-    // Log para depuración
     error_log("[asistencia_webhook] Docente no encontrado: '{$nombreForm}'");
     responder(404, ['ok' => false, 'error' => "No se encontró un docente que coincida con '{$nombreForm}'"]);
 }
@@ -115,6 +114,7 @@ if (!$idDocente) {
 $fecha = $body['fecha'] ?? date('Y-m-d');
 $hora  = $body['hora']  ?? date('H:i:s');
 $observaciones = $body['observaciones'] ?? '';
+$ahora = date('Y-m-d H:i:s'); // Para created_at
 
 try {
     // Verificar si ya existe un registro para este docente y fecha
@@ -132,7 +132,8 @@ try {
                 UPDATE asistencias 
                 SET hora_entrada = :hora, 
                     estado = :estado,
-                    observaciones = COALESCE(NULLIF(:observaciones, \'\'), observaciones)
+                    observaciones = COALESCE(NULLIF(:observaciones, \'\'), observaciones),
+                    created_at = :created_at
                 WHERE id_docente = :id_docente AND fecha = :fecha
             ');
             $stmt->execute([
@@ -141,11 +142,12 @@ try {
                 ':hora'          => $hora,
                 ':estado'        => $estado,
                 ':observaciones' => $observaciones,
+                ':created_at'    => $ahora
             ]);
         } else {
             $stmt = $db->prepare('
-                INSERT INTO asistencias (id_docente, fecha, hora_entrada, estado, observaciones, registrado_por)
-                VALUES (:id_docente, :fecha, :hora, :estado, :observaciones, :registrado_por)
+                INSERT INTO asistencias (id_docente, fecha, hora_entrada, estado, observaciones, registrado_por, created_at)
+                VALUES (:id_docente, :fecha, :hora, :estado, :observaciones, :registrado_por, :created_at)
             ');
             $stmt->execute([
                 ':id_docente'    => $idDocente,
@@ -153,7 +155,8 @@ try {
                 ':hora'          => $hora,
                 ':estado'        => $estado,
                 ':observaciones' => $observaciones,
-                ':registrado_por' => 'formulario'
+                ':registrado_por' => 'formulario',
+                ':created_at'    => $ahora
             ]);
         }
         
@@ -163,7 +166,8 @@ try {
             $stmt = $db->prepare('
                 UPDATE asistencias 
                 SET hora_salida = :hora,
-                    observaciones = COALESCE(NULLIF(:observaciones, \'\'), observaciones)
+                    observaciones = COALESCE(NULLIF(:observaciones, \'\'), observaciones),
+                    created_at = :created_at
                 WHERE id_docente = :id_docente AND fecha = :fecha
             ');
             $stmt->execute([
@@ -171,11 +175,12 @@ try {
                 ':fecha'         => $fecha,
                 ':hora'          => $hora,
                 ':observaciones' => $observaciones,
+                ':created_at'    => $ahora
             ]);
         } else {
             $stmt = $db->prepare('
-                INSERT INTO asistencias (id_docente, fecha, hora_salida, estado, observaciones, registrado_por)
-                VALUES (:id_docente, :fecha, :hora, :estado, :observaciones, :registrado_por)
+                INSERT INTO asistencias (id_docente, fecha, hora_salida, estado, observaciones, registrado_por, created_at)
+                VALUES (:id_docente, :fecha, :hora, :estado, :observaciones, :registrado_por, :created_at)
             ');
             $stmt->execute([
                 ':id_docente'    => $idDocente,
@@ -183,7 +188,8 @@ try {
                 ':hora'          => $hora,
                 ':estado'        => 'asistio',
                 ':observaciones' => $observaciones,
-                ':registrado_por' => 'formulario'
+                ':registrado_por' => 'formulario',
+                ':created_at'    => $ahora
             ]);
         }
     }
@@ -192,5 +198,9 @@ try {
     
 } catch (PDOException $e) {
     error_log("[asistencia_webhook] Error SQL: " . $e->getMessage());
-    responder(500, ['ok' => false, 'error' => 'Error al guardar en base de datos: ' . $e->getMessage()]);
+    responder(500, [
+        'ok' => false, 
+        'error' => 'Error al guardar en base de datos',
+        'sql_error' => $e->getMessage()
+    ]);
 }
