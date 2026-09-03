@@ -129,7 +129,7 @@ try {
 
     if ($accion === 'Hora de entrada') {
         // Calcular estado
-        $horaLimite = $config['hora_limite_tardanza'] ?? '08:15:00';
+        $horaLimite = $config['hora_limite_tardanza'] ?? '15:10:00';
         $estado = ($hora <= $horaLimite) ? 'asistio' : 'tardanza';
 
         if ($existe) {
