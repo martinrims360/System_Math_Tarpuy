@@ -118,43 +118,76 @@ $hora  = $body['hora']  ?? date('H:i:s');
 $observaciones = $body['observaciones'] ?? '';
 
 try {
+    // Verificar si ya existe un registro para este docente y fecha
+    $stmt = $db->prepare('SELECT id_asistencia FROM asistencias WHERE id_docente = :id_docente AND fecha = :fecha');
+    $stmt->execute([':id_docente' => $idDocente, ':fecha' => $fecha]);
+    $existe = $stmt->fetchColumn();
+
     if ($accion === 'Hora de entrada') {
         // Calcular estado (asistio vs tardanza)
         $horaLimite = $config['hora_limite_tardanza'] ?? '08:15:00';
         $estado = ($hora <= $horaLimite) ? 'asistio' : 'tardanza';
 
-        // INSERT con las columnas que existen en tu tabla
-        $stmt = $db->prepare('
-            INSERT INTO asistencias (id_docente, fecha, hora_entrada, estado, observaciones, registrado_por)
-            VALUES (:id_docente, :fecha, :hora, :estado, :observaciones, \'formulario\')
-            ON CONFLICT (id_docente, fecha) DO UPDATE SET
-                hora_entrada   = EXCLUDED.hora_entrada,
-                estado         = EXCLUDED.estado,
-                observaciones  = COALESCE(NULLIF(EXCLUDED.observaciones, \'\'), asistencias.observaciones)
-        ');
-        $stmt->execute([
-            ':id_docente'    => $idDocente,
-            ':fecha'         => $fecha,
-            ':hora'          => $hora,
-            ':estado'        => $estado,
-            ':observaciones' => $observaciones,
-        ]);
+        if ($existe) {
+            // Actualizar registro existente
+            $stmt = $db->prepare('
+                UPDATE asistencias 
+                SET hora_entrada = :hora, 
+                    estado = :estado,
+                    observaciones = COALESCE(NULLIF(:observaciones, \'\'), observaciones)
+                WHERE id_docente = :id_docente AND fecha = :fecha
+            ');
+            $stmt->execute([
+                ':id_docente'    => $idDocente,
+                ':fecha'         => $fecha,
+                ':hora'          => $hora,
+                ':estado'        => $estado,
+                ':observaciones' => $observaciones,
+            ]);
+        } else {
+            // Insertar nuevo registro
+            $stmt = $db->prepare('
+                INSERT INTO asistencias (id_docente, fecha, hora_entrada, estado, observaciones, registrado_por)
+                VALUES (:id_docente, :fecha, :hora, :estado, :observaciones, \'formulario\')
+            ');
+            $stmt->execute([
+                ':id_docente'    => $idDocente,
+                ':fecha'         => $fecha,
+                ':hora'          => $hora,
+                ':estado'        => $estado,
+                ':observaciones' => $observaciones,
+            ]);
+        }
         
     } else {
-        // "Hora de salida": solo actualiza hora_salida
-        $stmt = $db->prepare('
-            INSERT INTO asistencias (id_docente, fecha, hora_salida, estado, observaciones, registrado_por)
-            VALUES (:id_docente, :fecha, :hora, \'asistio\', :observaciones, \'formulario\')
-            ON CONFLICT (id_docente, fecha) DO UPDATE SET
-                hora_salida    = EXCLUDED.hora_salida,
-                observaciones  = COALESCE(NULLIF(EXCLUDED.observaciones, \'\'), asistencias.observaciones)
-        ');
-        $stmt->execute([
-            ':id_docente'    => $idDocente,
-            ':fecha'         => $fecha,
-            ':hora'          => $hora,
-            ':observaciones' => $observaciones,
-        ]);
+        // "Hora de salida"
+        if ($existe) {
+            // Actualizar registro existente
+            $stmt = $db->prepare('
+                UPDATE asistencias 
+                SET hora_salida = :hora,
+                    observaciones = COALESCE(NULLIF(:observaciones, \'\'), observaciones)
+                WHERE id_docente = :id_docente AND fecha = :fecha
+            ');
+            $stmt->execute([
+                ':id_docente'    => $idDocente,
+                ':fecha'         => $fecha,
+                ':hora'          => $hora,
+                ':observaciones' => $observaciones,
+            ]);
+        } else {
+            // Insertar nuevo registro (solo salida, estado por defecto 'asistio')
+            $stmt = $db->prepare('
+                INSERT INTO asistencias (id_docente, fecha, hora_salida, estado, observaciones, registrado_por)
+                VALUES (:id_docente, :fecha, :hora, \'asistio\', :observaciones, \'formulario\')
+            ');
+            $stmt->execute([
+                ':id_docente'    => $idDocente,
+                ':fecha'         => $fecha,
+                ':hora'          => $hora,
+                ':observaciones' => $observaciones,
+            ]);
+        }
     }
 
     responder(200, ['ok' => true]);
@@ -162,5 +195,6 @@ try {
 } catch (PDOException $e) {
     // Log del error real para depuración
     error_log("[asistencia_webhook] Error SQL: " . $e->getMessage());
-    responder(500, ['ok' => false, 'error' => 'Error al guardar en base de datos']);
+    error_log("[asistencia_webhook] Datos: id_docente={$idDocente}, fecha={$fecha}, accion={$accion}");
+    responder(500, ['ok' => false, 'error' => 'Error al guardar en base de datos: ' . $e->getMessage()]);
 }
